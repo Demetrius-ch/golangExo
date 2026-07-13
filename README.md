@@ -407,4 +407,53 @@ func main() {
 
 ---
 
-**Prochaine étape :** Structurer les données avec des `struct` ! 
+Jusqu'à présent, nos Slices et nos Maps ne pouvaient stocker qu'un seul type d'information à la fois (uniquement des int, ou uniquement des string). Mais dans la vraie vie d'une entreprise, les données sont hétérogènes. Par exemple, un Utilisateur possède un nom (string), un âge (int), et un statut actif ou non (bool).
+
+C'est là qu'interviennent les Structs. Elles permettent de créer ton propre type de donnée personnalisé, un "moule" qui regroupe plusieurs variables (qu'on appelle des champs).
+
+🟡 Étape 6 : Les Structs (Structures)
+
+1. Déclarer une Struct
+   La déclaration se fait toujours en dehors du main (au niveau global du fichier). On utilise les mots-clés type et struct :
+
+Go
+type Utilisateur struct {
+Nom string
+Age int
+Actif bool
+} 2. Créer une instance (un objet)
+Une fois le moule créé, on peut fabriquer autant d'utilisateurs qu'on veut dans notre main :
+
+Go
+// Méthode la plus lisible en nommant les champs
+u1 := Utilisateur{
+Nom: "Alice",
+Age: 28,
+Actif: true,
+} 3. Lire et Modifier les champs
+Pour accéder aux informations ou les modifier, on utilise le point . :
+
+Go
+// Lire
+fmt.Println(u1.Nom) // Affiche: Alice
+
+// Modifier
+u1.Age = 29 // Alice fête son anniversaire !
+💻 Ton Exercice : La Fiche Produit
+Tu vas créer le système de gestion des articles de notre e-commerce.
+
+Consignes :
+
+En dehors de ton main, crée une struct nommée Produit avec trois champs :
+
+Nom (string)
+
+Prix (int en centimes, comme d'habitude !)
+
+Stock (int)
+
+Dans ton main, crée un produit nommé monOrdi avec les valeurs suivantes : "MacBook Pro", un prix de 150000 centimes (1500 €), et un stock initial de 5.
+
+Simule une vente : diminue le stock de monOrdi de 1 unité (en utilisant le point .).
+
+Affiche proprement dans le terminal le nom du produit, son prix formaté en Euros (%.2f) et son nouveau stock.

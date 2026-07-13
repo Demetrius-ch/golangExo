@@ -2,19 +2,32 @@ package main
 
 import "fmt"
 
-func calculerImpot(salaireAnnuel int) int {
-	impot := 0
-	if salaireAnnuel > 3000000 {
-		impot = ((salaireAnnuel - 3000000) / 5) + 200000
-	} else if salaireAnnuel > 1000000 {
-		impot = ((salaireAnnuel - 1000000) / 10)
-
-	} else {
-		impot = 0
-	}
-	return impot
+type Smartphone struct {
+	Modele   string
+	Batterie int
 }
+
+func (charger *Smartphone) chagerTelephone(minutes int) {
+	gain := minutes * 2
+	charger.Batterie += gain
+
+	if charger.Batterie > 100 {
+		charger.Batterie = 100
+		fmt.Printf("Charge complète")
+	}
+}
+
 func main() {
-	monTaux := calculerImpot(35000000)
-	fmt.Printf("Le taux de mon salaire annuel est %.2f", float64(monTaux)/100)
+	monTel := Smartphone{
+		Modele:   "Tecno",
+		Batterie: 20,
+	}
+	monTel.chagerTelephone(10)
+
+	fmt.Printf("Avant charge : %s à %d%%\n", monTel.Modele, monTel.Batterie)
+
+	// Appel de la méthode : charge de 50 minutes (gain théorique de 100%)
+	monTel.chagerTelephone(50)
+
+	fmt.Printf(" Après charge : %s à %d%%\n", monTel.Modele, monTel.Batterie)
 }
