@@ -7,13 +7,14 @@ type Smartphone struct {
 	Batterie int
 }
 
-func (charger *Smartphone) chagerTelephone(minutes int) {
+// Correction 1 : Nom de la méthode corrigé ("charger") et récepteur clair ("s")
+func (s *Smartphone) charger(minutes int) {
 	gain := minutes * 2
-	charger.Batterie += gain
+	s.Batterie += gain
 
-	if charger.Batterie > 100 {
-		charger.Batterie = 100
-		fmt.Printf("Charge complète")
+	if s.Batterie > 100 {
+		s.Batterie = 100
+		fmt.Println("Charge complète atteinte !")
 	}
 }
 
@@ -22,12 +23,15 @@ func main() {
 		Modele:   "Tecno",
 		Batterie: 20,
 	}
-	monTel.chagerTelephone(10)
 
+	// Correction 2 : Affichage AVANT toute action
 	fmt.Printf("Avant charge : %s à %d%%\n", monTel.Modele, monTel.Batterie)
 
-	// Appel de la méthode : charge de 50 minutes (gain théorique de 100%)
-	monTel.chagerTelephone(50)
+	// Première charge (10 min = +20%) -> Devient 40%
+	monTel.charger(10)
 
-	fmt.Printf(" Après charge : %s à %d%%\n", monTel.Modele, monTel.Batterie)
-}
+	// Deuxième charge (50 min = +100% théorique) -> Capé à 100%
+	monTel.charger(50)
+
+	fmt.Printf("Après charge : %s à %d%%\n", monTel.Modele, monTel.Batterie)
+}   
