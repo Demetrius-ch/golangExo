@@ -7,7 +7,9 @@
 3. [Cas Pratique : Système de Facturation Pay-As-You-Go](#cas-pratique--système-de-facturation-pay-as-you-go)
 4. [Concepts : Slices et Tableaux](#concepts--slices-et-tableaux)
 5. [Étape 5 : Les Maps (Dictionnaires Clés/Valeurs)](#étape-5--les-maps-dictionnaires-clésvaleurs)
-6. [À Retenir](#à-retenir)
+6. [Étape 6 : Les Structs (Structures)](#étape-6--les-structs-structures)
+7. [Étape 7 : Les Interfaces](#étape-7--les-interfaces)
+8. [À Retenir](#à-retenir)
 
 ---
 
@@ -380,6 +382,127 @@ func main() {
 
 ---
 
+## Étape 6 : Les Structs (Structures)
+
+### Pourquoi les utiliser ?
+
+Jusqu'à présent, les slices et les maps nous permettaient de stocker des données de manière pratique, mais elles sont surtout adaptées à des collections simples. Dans la vraie vie, un objet possède souvent plusieurs informations liées entre elles : un nom, un âge, un statut, un prix, etc.
+
+C’est là qu’interviennent les structs. Une struct permet de créer son propre type de données personnalisé, comme un modèle ou un moule.
+
+### Déclaration d’une struct
+
+```go
+type Utilisateur struct {
+	Nom  string
+	Age  int
+	Actif bool
+}
+```
+
+### Créer une instance
+
+```go
+u1 := Utilisateur{
+	Nom:   "Alice",
+	Age:   28,
+	Actif: true,
+}
+```
+
+### Lire et modifier les champs
+
+```go
+fmt.Println(u1.Nom)
+u1.Age = 29
+```
+
+### Exercice : La Fiche Produit
+
+#### Énoncé
+
+Crée une struct nommée `Produit` avec trois champs :
+
+- `Nom string`
+- `Prix int`
+- `Stock int`
+
+Dans le `main`, crée un produit nommé `monOrdi` avec les valeurs suivantes :
+
+- `"MacBook Pro"`
+- `150000` centimes
+- `5` unités de stock
+
+Simule une vente en réduisant le stock de `1` unité puis affiche proprement le nom, le prix en euros et le stock restant.
+
+#### Correction
+
+```go
+package main
+
+import "fmt"
+
+type Produit struct {
+	Nom   string
+	Prix  int
+	Stock int
+}
+
+func main() {
+	monOrdi := Produit{
+		Nom:   "MacBook Pro",
+		Prix:  150000,
+		Stock: 5,
+	}
+
+	monOrdi.Stock -= 1
+
+	fmt.Printf("Produit : %s\n", monOrdi.Nom)
+	fmt.Printf("Prix : %.2f €\n", float64(monOrdi.Prix)/100)
+	fmt.Printf("Stock restant : %d\n", monOrdi.Stock)
+}
+```
+
+---
+
+## Étape 7 : Les Interfaces
+
+### Concept clé
+
+Une interface décrit un comportement attendu. Elle ne contient pas de données concrètes, mais une liste de méthodes que doit implémenter un type.
+
+L’idée principale : un type satisfait une interface s’il possède les méthodes requises.
+
+### Exemple simple
+
+```go
+type Affichable interface {
+	Afficher() string
+}
+
+type Produit struct {
+	Nom string
+}
+
+func (p Produit) Afficher() string {
+	return p.Nom
+}
+
+func afficherDetails(a Affichable) {
+	fmt.Println(a.Afficher())
+}
+```
+
+### Pourquoi les interfaces sont utiles ?
+
+Elles permettent de travailler avec différents types de manière uniforme, sans avoir à connaître leur structure interne.
+
+### Exercice guidé
+
+Crée une interface `Affichable` avec une méthode `Afficher() string`. Ensuite, implémente cette interface pour un type `Produit` et un type `Client`, puis teste la fonction `afficherDetails`.
+
+---
+
 ## À Retenir
 
 ### Concepts Fondamentaux
@@ -397,63 +520,17 @@ func main() {
 ✅ **Maps** — Dictionnaires clés/valeurs  
 ✅ **Comma Ok** — Vérifier l'existence d'une clé avec `value, ok := map[key]`
 
+### Modélisation et Abstraction
+
+✅ **Structs** — Regrouper plusieurs champs liés dans un même type  
+✅ **Interfaces** — Définir un contrat de comportement  
+✅ **Méthodes** — Ajouter des comportements à un type  
+✅ **Séparation des responsabilités** — Écrire un code plus propre et plus extensible
+
 ### Bonnes Pratiques
 
 ✅ Nommer les variables de manière explicite  
 ✅ Ajouter des commentaires sur le code complexe  
 ✅ Tester avec plusieurs cas (normal, erreur, limite)  
 ✅ Formater le code avec une indentation cohérente  
-✅ Utiliser les structures plutôt que les maps pour du code structuré
-
----
-
-Jusqu'à présent, nos Slices et nos Maps ne pouvaient stocker qu'un seul type d'information à la fois (uniquement des int, ou uniquement des string). Mais dans la vraie vie d'une entreprise, les données sont hétérogènes. Par exemple, un Utilisateur possède un nom (string), un âge (int), et un statut actif ou non (bool).
-
-C'est là qu'interviennent les Structs. Elles permettent de créer ton propre type de donnée personnalisé, un "moule" qui regroupe plusieurs variables (qu'on appelle des champs).
-
-🟡 Étape 6 : Les Structs (Structures)
-
-1. Déclarer une Struct
-   La déclaration se fait toujours en dehors du main (au niveau global du fichier). On utilise les mots-clés type et struct :
-
-Go
-type Utilisateur struct {
-Nom string
-Age int
-Actif bool
-} 2. Créer une instance (un objet)
-Une fois le moule créé, on peut fabriquer autant d'utilisateurs qu'on veut dans notre main :
-
-Go
-// Méthode la plus lisible en nommant les champs
-u1 := Utilisateur{
-Nom: "Alice",
-Age: 28,
-Actif: true,
-} 3. Lire et Modifier les champs
-Pour accéder aux informations ou les modifier, on utilise le point . :
-
-Go
-// Lire
-fmt.Println(u1.Nom) // Affiche: Alice
-
-// Modifier
-u1.Age = 29 // Alice fête son anniversaire !
-💻 Ton Exercice : La Fiche Produit
-Tu vas créer le système de gestion des articles de notre e-commerce.
-
-Consignes :
-
-En dehors de ton main, crée une struct nommée Produit avec trois champs :
-
-Nom (string)
-
-Prix (int en centimes, comme d'habitude !)
-
-Stock (int)
-
-Dans ton main, crée un produit nommé monOrdi avec les valeurs suivantes : "MacBook Pro", un prix de 150000 centimes (1500 €), et un stock initial de 5.
-
-Simule une vente : diminue le stock de monOrdi de 1 unité (en utilisant le point .).
-
-Affiche proprement dans le terminal le nom du produit, son prix formaté en Euros (%.2f) et son nouveau stock.
+✅ Utiliser les structs et les interfaces pour structurer proprement un projet
