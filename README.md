@@ -711,3 +711,188 @@ err := biblio.AjouterLivre("LOTR", "Le Seigneur des anneaux")
     }
 
 }
+
+package main
+
+import (
+"errors"
+"fmt"
+"os"
+"strings"
+)
+
+// Gestionnaire contient la map des tâches et le chemin du fichier de sauvegarde
+type Gestionnaire struct {
+Taches map[string]string
+FichierSauvegarde string
+}
+
+// AjouterTache ajoute une tâche avec validation stricte
+func (g \*Gestionnaire) AjouterTache(id string, description string) error {
+// Vérification : description vide
+if description == "" {
+return errors.New("la description ne peut pas être vide")
+}
+
+    // Vérification : ID déjà existant
+    if _, existe := g.Taches[id]; existe {
+    	return errors.New("l'ID de la tâche existe déjà")
+    }
+
+    // Ajout dans la map
+    g.Taches[id] = description
+    return nil
+
+}
+
+// Sauvegarder écrit les tâches dans le fichier ou renvoie une erreur
+func (g \*Gestionnaire) Sauvegarder() error {
+// Vérification : map vide
+if len(g.Taches) == 0 {
+return errors.New("aucune tâche à sauvegarder")
+}
+
+    // Conversion en format texte
+    var sb strings.Builder
+    for id, desc := range g.Taches {
+    	sb.WriteString(fmt.Sprintf("%s: %s\n", id, desc))
+    }
+    contenu := sb.String()
+
+    // Écriture dans le fichier
+    err := os.WriteFile(g.FichierSauvegarde, []byte(contenu), 0644)
+    if err != nil {
+    	return err
+    }
+
+    return nil
+
+}
+
+func main() {
+// Initialisation
+gestionnaire := Gestionnaire{
+Taches: make(map[string]string),
+FichierSauvegarde: "todo.txt",
+}
+
+    // 1. Test : Ajout avec description vide
+    err := gestionnaire.AjouterTache("T0", "")
+    if err != nil {
+    	fmt.Printf("Erreur attendue (description vide) : %v\n", err)
+    }
+
+    // 2. Ajout de deux tâches valides
+    err = gestionnaire.AjouterTache("T1", "Acheter du pain")
+    if err != nil {
+    	fmt.Printf("Erreur inattendue : %v\n", err)
+    }
+
+    err = gestionnaire.AjouterTache("T2", "Coder en Go")
+    if err != nil {
+    	fmt.Printf("Erreur inattendue : %v\n", err)
+    }
+
+    // 3. Sauvegarde
+    err = gestionnaire.Sauvegarder()
+    if err != nil {
+    	fmt.Printf("Erreur de sauvegarde : %v\n", err)
+    } else {
+    	fmt.Println("Sauvegarde réussie dans todo.txt")
+    }
+
+    // Test bonus : Vérifier la duplication d'ID
+    err = gestionnaire.AjouterTache("T1", "Duplication")
+    if err != nil {
+    	fmt.Printf("Erreur attendue (ID dupliqué) : %v\n", err)
+    }
+
+
+}
+package main
+
+import (
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+)
+
+// GestionnaireLogs gère le cycle de vie d'un dossier de logs.
+type GestionnaireLogs struct {
+	Dossier string
+}
+
+// Initialiser vérifie l'existence du dossier et le crée si nécessaire.
+func (g *GestionnaireLogs) Initialiser() error {
+	// 1. Vérifier si le dossier existe avec os.Stat
+	info, err := os.Stat(g.Dossier)
+
+	// Cas 1 : Le dossier n'existe pas -> On le crée
+	if os.IsNotExist(err) {
+		// 0755 donne les droits rwx pour le propriétaire, rx pour les autres
+		return os.Mkdir(g.Dossier, 0755)
+	}
+
+	// Cas 2 : Une autre erreur survient (problème de permission, chemin invalide, etc.)
+	if err != nil {
+		return err
+	}
+
+	// Cas 3 : Le chemin existe, mais est-ce bien un dossier ?
+	if !info.IsDir() {
+		return errors.New("le chemin spécifié existe mais n'est pas un dossier")
+	}
+
+	// Le dossier existe déjà et est valide
+	return nil
+}
+
+// CreerFichierLog crée un fichier de log avec le contenu fourni.
+func (g *GestionnaireLogs) CreerFichierLog(nomFichier string, contenu string) error {
+	// Validation stricte du contenu
+	if contenu == "" {
+		return errors.New("contenu vide interdit")
+	}
+
+	// Construction du chemin complet de manière sécurisée
+	cheminComplet := filepath.Join(g.Dossier, nomFichier)
+
+	// Écriture du fichier
+	// 0644 donne les droits rw pour le propriétaire, r pour les autres
+	return os.WriteFile(cheminComplet, []byte(contenu), 0644)
+}
+
+// PurgerDossier supprime entièrement le dossier de logs et son contenu.
+func (g *GestionnaireLogs) PurgerDossier() error {
+	// os.RemoveAll supprime le chemin et tout ce qu'il contient (fichiers, sous-dossiers)
+	// Si le dossier n'existe déjà pas, os.RemoveAll ne renvoie pas d'erreur (comportement standard Go)
+	return os.RemoveAll(g.Dossier)
+}
+
+func main() {
+	g := GestionnaireLogs{
+		Dossier: "mes_logs",
+	}
+
+	// 1. Initialisation
+	g.Initialiser()
+
+	// 2. Test contenu vide
+	err := g.CreerFichierLog("test.log", "")
+	if err == nil {
+		fmt.Println("Erreur : aurait dû refuser le contenu vide !")
+	}
+
+	// 3. Création d'un log valide
+	g.CreerFichierLog("app.log", "2026-07-21 : Systeme demarre avec succes")
+
+	// 4. Purge du dossier
+	err = g.PurgerDossier()
+	if err != nil {
+		fmt.Println("Erreur lors de la purge :", err)
+	} else {
+		fmt.Println("Dossier de logs purgé avec succès !")
+	}
+}
+
