@@ -534,3 +534,180 @@ Crée une interface `Affichable` avec une méthode `Afficher() string`. Ensuite,
 ✅ Tester avec plusieurs cas (normal, erreur, limite)  
 ✅ Formater le code avec une indentation cohérente  
 ✅ Utiliser les structs et les interfaces pour structurer proprement un projet
+
+**Gestion Utilisateur**
+
+package main
+import "fmt"
+
+type GestionnaireUtilisateur struct {
+BaseDonnees map[string]string
+}
+
+func (g *GestionnaireUtilisateur) Inscrire(pseudo string, mdp string) {
+valeur, estPresent := g.BaseDonnees[pseudo]
+\_= valeur
+if len (mdp) <8 {
+fmt.Printf("Erreur : Le mot de passe doit contenir au moins 8 caractères.\n")
+return
+}
+if estPresent {
+fmt.Println("Déjà pris")
+return
+}
+g.BaseDonnees[pseudo] = mdp
+fmt.Printf("Succès : Utililisateur '%s' est inscrit avec succès\n",pseudo)
+}
+func (g *GestionnaireUtilisateur) Connexion(pseudo string, mdp string) bool {
+mdpStocke, estPresent := g.BaseDonnees[pseudo]
+
+    if !estPresent {
+        fmt.Printf("Erreur ! Utililisateur inconnue\n")
+        return false
+    }
+    if mdpStocke != mdp {
+        fmt.Printf("Mot de passe incorrect\n")
+        return false
+    }
+    fmt.Printf("Bienvenue %s", pseudo)
+    return true
+
+}
+
+func main() {
+gestionnaire := GestionnaireUtilisateur{
+BaseDonnees : make(map[string]string),
+}
+fmt.Println("--- Début du scénario")
+gestionnaire.Inscrire("demetrius", "secret123")
+gestionnaire.Inscrire("demetrius", "autremdp")
+gestionnaire.Connexion("charlie","mifml")
+gestionnaire.Connexion("demetrius", "dlf")
+gestionnaire.Connexion("demetrius", "secret123")
+}
+
+🧱 Étape 1 : Les Structures
+Tu as besoin de deux structures :
+
+Livre : Contient un Titre (string) et EstEmprunte (bool).
+
+Bibliotheque : Contient une map appelée Catalogue. Cette map associe un string (le code unique du livre, ex: "LIV-01") à une structure Livre.
+
+📜 Étape 2 : Les Méthodes (Avec gestion des erreurs)
+Attache deux méthodes à ton Bibliotheque :
+
+AjouterLivre(code string, titre string) error :
+
+Clause de garde : Si le code existe déjà dans la map, renvoyer une erreur : errors.New("le code livre existe déjà").
+
+Action : Sinon, ajouter le livre dans la map (avec EstEmprunte à false par défaut) et renvoyer nil.
+
+EmprunterLivre(code string) error :
+
+Clause de garde 1 : Si le code du livre n'existe pas dans la map, renvoyer : errors.New("livre introuvable dans le catalogue").
+
+Clause de garde 2 : Si le livre existe mais que sa variable EstEmprunte est déjà à true, renvoyer : errors.New("ce livre est déjà emprunté par quelqu'un d'autre").
+
+Action : Si tout est bon, modifier le livre dans la map pour le passer à EstEmprunte = true et renvoyer nil.
+
+(⚠️ Attention : Quand tu récupères une structure depuis une map, Go te donne une COPIE. Pour modifier le livre dans la map, n'oublie pas de le réassigner après modification ! Ex: g.Catalogue[code] = monLivreModifie).
+
+🚀 Étape 3 : Le Scénario de test (Ton main)
+Dans ton main :
+
+Crée une bibliothèque et initialise sa map.
+
+Ajoute le livre "Le Seigneur des Anneaux" avec le code "LOTR".
+
+Tente d'ajouter à nouveau un livre avec le code "LOTR" (gère et affiche l'erreur obtenue).
+
+Tente d'emprunter le livre "HARRY" (gère et affiche l'erreur : livre introuvable).
+
+Emprunte le livre "LOTR" (doit réussir, affiche un message de succès).
+
+Tente d'emprunter à nouveau "LOTR" (gère et affiche l'erreur : déjà emprunté).
+
+C'est le test ultime pour manipuler les maps et intégrer la gestion des erreurs officielle de Go. À toi de jouer !
+
+\*\*Gestion Bibliothèque
+
+package main
+
+import (
+"errors"
+"fmt"
+)
+type Livre struct {
+Titre string
+EstEmprunte bool
+}
+type Biblitoheque struct {
+Catalogue map[string]Livre
+}
+func (b \*Biblitoheque) AjouterLivre(code string, titre string) error {
+\_, existe := b.Catalogue[code]
+if existe {
+return errors.New("Le code livre exis déjà")
+}
+b.Catalogue[code] = Livre {
+Titre: titre,
+EstEmprunte:false,
+}
+return nil
+
+}
+
+func (b \*Biblitoheque) EmprunterLivre(code string) error {
+livre, existe := b.Catalogue[code]
+
+    if !existe{
+        return errors.New("Livre introuvable dans le catalogue.")
+
+    }
+    if livre.EstEmprunte {
+        return errors.New("Ce livre est déjà emprunté par quelqu'un d'autre.")
+    }
+    livre.EstEmprunte = true
+    b.Catalogue[code] = livre
+    return nil
+
+}
+
+func main() {
+biblio :=Biblitoheque {
+Catalogue: make(map[string]Livre),
+}
+err := biblio.AjouterLivre("LOTR", "Le Seigneur des anneaux")
+
+    if err != nil {
+        fmt.Printf("Erreur : %v\n", err)
+    } else {
+        fmt.Println("Livre 'LOTR' ajouté avec succès")
+    }
+    err = biblio.AjouterLivre("LOTR", "Un autre livre")
+    if err != nil {
+        fmt.Printf("Erreur : %v\n", err)
+    }
+    err = biblio.EmprunterLivre("HARRY")
+    if err != nil {
+        fmt.Printf("Erreur : %v\n", err)
+
+    } else {
+        fmt.Printf("Livre HARRYY emprunté avec succès.")
+    }
+    err = biblio.EmprunterLivre("LOTR")
+    if err != nil {
+         fmt.Printf("Erreur : %v\n", err)
+
+    }else {
+        fmt.Printf("Livre LOTR emprunté avec succès.")
+    }
+     err = biblio.EmprunterLivre("LOTR")
+    if err != nil {
+         fmt.Printf("Erreur : %v\n", err)
+
+    }else {
+        fmt.Printf("Livre LOTR emprunté avec succès.")
+    }
+
+}
