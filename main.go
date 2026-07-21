@@ -1,18 +1,26 @@
 package main
 
 import (
-    "fmt"
-    "os"
+	"fmt"
+	"os"
 )
 
 func main() {
-    // On lit le fichier. Ça nous renvoie des bytes et une erreur
-    donnees, err := os.ReadFile("notes.txt")
-    if err != nil {
-        fmt.Println("Erreur lors de la lecture :", err)
-        return
-    }
-    
-    // On transforme les bytes en texte lisible (string)
-    fmt.Println(string(donnees))
+	texte := "Bonjour Demetrius, ceci est enregistré sur votre disque."
+
+	donnees := []byte(texte)
+
+	err := os.WriteFile("notes.txt", donnees, 0644)
+
+	if err != nil {
+		//	Gérer les permissions même en cas d'erreur
+	}
+	_, errf := os.ReadFile("note.txt")
+
+	if errf != nil {
+		fmt.Println("Erreur lors de la lecteur du fichier", errf)
+		return
+	}
+	fmt.Println(string(donnees))
+
 }
