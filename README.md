@@ -9,7 +9,8 @@
 5. [Étape 5 : Les Maps (Dictionnaires Clés/Valeurs)](#étape-5--les-maps-dictionnaires-clésvaleurs)
 6. [Étape 6 : Les Structs (Structures)](#étape-6--les-structs-structures)
 7. [Étape 7 : Les Interfaces](#étape-7--les-interfaces)
-8. [À Retenir](#à-retenir)
+8. [Backend : création de routes HTTP](#backend--création-de-routes-http)
+9. [À Retenir](#à-retenir)
 
 ---
 
@@ -503,6 +504,46 @@ Crée une interface `Affichable` avec une méthode `Afficher() string`. Ensuite,
 
 ---
 
+## Backend : création de routes HTTP
+
+### Objectif
+
+Passer d’un script simple à un mini backend HTTP en Go. L’objectif est de créer des routes accessibles dans le navigateur ou via un client HTTP.
+
+### Concepts abordés
+
+- `net/http`
+- `http.HandleFunc`
+- `http.ListenAndServe`
+- création de routes comme `/`, `/hello` et `/saluer`
+
+### Exemple de base
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+func accueilHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Bienvenue sur mon serveur Go")
+}
+
+func main() {
+	http.HandleFunc("/", accueilHandler)
+	fmt.Println("Le serveur démarre sur http://localhost:8080")
+	http.ListenAndServe(":8080", nil)
+}
+```
+
+### Exercice proposé
+
+Créer une route `/api/bonjour` qui répond avec un message JSON ou texte, puis tester la réponse dans le navigateur ou avec `curl`.
+
+---
+
 ## À Retenir
 
 ### Concepts Fondamentaux
@@ -807,92 +848,93 @@ FichierSauvegarde: "todo.txt",
     	fmt.Printf("Erreur attendue (ID dupliqué) : %v\n", err)
     }
 
-
 }
 package main
 
 import (
-	"errors"
-	"fmt"
-	"os"
-	"path/filepath"
+"errors"
+"fmt"
+"os"
+"path/filepath"
 )
 
 // GestionnaireLogs gère le cycle de vie d'un dossier de logs.
 type GestionnaireLogs struct {
-	Dossier string
+Dossier string
 }
 
 // Initialiser vérifie l'existence du dossier et le crée si nécessaire.
-func (g *GestionnaireLogs) Initialiser() error {
-	// 1. Vérifier si le dossier existe avec os.Stat
-	info, err := os.Stat(g.Dossier)
+func (g \*GestionnaireLogs) Initialiser() error {
+// 1. Vérifier si le dossier existe avec os.Stat
+info, err := os.Stat(g.Dossier)
 
-	// Cas 1 : Le dossier n'existe pas -> On le crée
-	if os.IsNotExist(err) {
-		// 0755 donne les droits rwx pour le propriétaire, rx pour les autres
-		return os.Mkdir(g.Dossier, 0755)
-	}
+    // Cas 1 : Le dossier n'existe pas -> On le crée
+    if os.IsNotExist(err) {
+    	// 0755 donne les droits rwx pour le propriétaire, rx pour les autres
+    	return os.Mkdir(g.Dossier, 0755)
+    }
 
-	// Cas 2 : Une autre erreur survient (problème de permission, chemin invalide, etc.)
-	if err != nil {
-		return err
-	}
+    // Cas 2 : Une autre erreur survient (problème de permission, chemin invalide, etc.)
+    if err != nil {
+    	return err
+    }
 
-	// Cas 3 : Le chemin existe, mais est-ce bien un dossier ?
-	if !info.IsDir() {
-		return errors.New("le chemin spécifié existe mais n'est pas un dossier")
-	}
+    // Cas 3 : Le chemin existe, mais est-ce bien un dossier ?
+    if !info.IsDir() {
+    	return errors.New("le chemin spécifié existe mais n'est pas un dossier")
+    }
 
-	// Le dossier existe déjà et est valide
-	return nil
+    // Le dossier existe déjà et est valide
+    return nil
+
 }
 
 // CreerFichierLog crée un fichier de log avec le contenu fourni.
-func (g *GestionnaireLogs) CreerFichierLog(nomFichier string, contenu string) error {
-	// Validation stricte du contenu
-	if contenu == "" {
-		return errors.New("contenu vide interdit")
-	}
+func (g \*GestionnaireLogs) CreerFichierLog(nomFichier string, contenu string) error {
+// Validation stricte du contenu
+if contenu == "" {
+return errors.New("contenu vide interdit")
+}
 
-	// Construction du chemin complet de manière sécurisée
-	cheminComplet := filepath.Join(g.Dossier, nomFichier)
+    // Construction du chemin complet de manière sécurisée
+    cheminComplet := filepath.Join(g.Dossier, nomFichier)
 
-	// Écriture du fichier
-	// 0644 donne les droits rw pour le propriétaire, r pour les autres
-	return os.WriteFile(cheminComplet, []byte(contenu), 0644)
+    // Écriture du fichier
+    // 0644 donne les droits rw pour le propriétaire, r pour les autres
+    return os.WriteFile(cheminComplet, []byte(contenu), 0644)
+
 }
 
 // PurgerDossier supprime entièrement le dossier de logs et son contenu.
-func (g *GestionnaireLogs) PurgerDossier() error {
-	// os.RemoveAll supprime le chemin et tout ce qu'il contient (fichiers, sous-dossiers)
-	// Si le dossier n'existe déjà pas, os.RemoveAll ne renvoie pas d'erreur (comportement standard Go)
-	return os.RemoveAll(g.Dossier)
+func (g \*GestionnaireLogs) PurgerDossier() error {
+// os.RemoveAll supprime le chemin et tout ce qu'il contient (fichiers, sous-dossiers)
+// Si le dossier n'existe déjà pas, os.RemoveAll ne renvoie pas d'erreur (comportement standard Go)
+return os.RemoveAll(g.Dossier)
 }
 
 func main() {
-	g := GestionnaireLogs{
-		Dossier: "mes_logs",
-	}
-
-	// 1. Initialisation
-	g.Initialiser()
-
-	// 2. Test contenu vide
-	err := g.CreerFichierLog("test.log", "")
-	if err == nil {
-		fmt.Println("Erreur : aurait dû refuser le contenu vide !")
-	}
-
-	// 3. Création d'un log valide
-	g.CreerFichierLog("app.log", "2026-07-21 : Systeme demarre avec succes")
-
-	// 4. Purge du dossier
-	err = g.PurgerDossier()
-	if err != nil {
-		fmt.Println("Erreur lors de la purge :", err)
-	} else {
-		fmt.Println("Dossier de logs purgé avec succès !")
-	}
+g := GestionnaireLogs{
+Dossier: "mes_logs",
 }
 
+    // 1. Initialisation
+    g.Initialiser()
+
+    // 2. Test contenu vide
+    err := g.CreerFichierLog("test.log", "")
+    if err == nil {
+    	fmt.Println("Erreur : aurait dû refuser le contenu vide !")
+    }
+
+    // 3. Création d'un log valide
+    g.CreerFichierLog("app.log", "2026-07-21 : Systeme demarre avec succes")
+
+    // 4. Purge du dossier
+    err = g.PurgerDossier()
+    if err != nil {
+    	fmt.Println("Erreur lors de la purge :", err)
+    } else {
+    	fmt.Println("Dossier de logs purgé avec succès !")
+    }
+
+}
