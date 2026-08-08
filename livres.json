@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "titre": "Golang guide complet",
+    "auteur": "CDEV Solutions",
+    "disponible": false
+  },
+  {
+    "id": 2,
+    "titre": "JavaScript",
+    "auteur": "Believemy",
+    "disponible": true
+  }
+]

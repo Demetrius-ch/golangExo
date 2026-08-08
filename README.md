@@ -10,7 +10,8 @@
 6. [Étape 6 : Les Structs (Structures)](#étape-6--les-structs-structures)
 7. [Étape 7 : Les Interfaces](#étape-7--les-interfaces)
 8. [Backend : création de routes HTTP](#backend--création-de-routes-http)
-9. [À Retenir](#à-retenir)
+9. [OS et package os](#os-et-package-os)
+10. [À Retenir](#à-retenir)
 
 ---
 
@@ -458,6 +459,7 @@ func main() {
 
 	monOrdi.Stock -= 1
 
+
 	fmt.Printf("Produit : %s\n", monOrdi.Nom)
 	fmt.Printf("Prix : %.2f €\n", float64(monOrdi.Prix)/100)
 	fmt.Printf("Stock restant : %d\n", monOrdi.Stock)
@@ -538,9 +540,174 @@ func main() {
 }
 ```
 
+### JSON : Marshal et Unmarshal
+
+En backend Go, on utilise souvent `encoding/json` pour convertir entre structures Go et JSON.
+
+- `json.Marshal` transforme un objet Go en une suite d'octets JSON.
+- `json.Unmarshal` transforme une suite d'octets JSON en un objet Go.
+
+#### Exemple `Marshal`
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type Livre struct {
+	Titre  string `json:"titre"`
+	Auteur string `json:"auteur"`
+}
+
+func main() {
+	livre := Livre{Titre: "Le Petit Prince", Auteur: "Antoine de Saint-Exupéry"}
+	jsonData, err := json.Marshal(livre)
+	if err != nil {
+		fmt.Println("Erreur de conversion JSON :", err)
+		return
+	}
+	fmt.Println(string(jsonData))
+}
+```
+
+#### Exemple `Unmarshal`
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type Livre struct {
+	Titre  string `json:"titre"`
+	Auteur string `json:"auteur"`
+}
+
+func main() {
+	jsonData := []byte(`{"titre":"Le Petit Prince","auteur":"Antoine de Saint-Exupéry"}`)
+	var livre Livre
+	if err := json.Unmarshal(jsonData, &livre); err != nil {
+		fmt.Println("Erreur de lecture JSON :", err)
+		return
+	}
+	fmt.Printf("Titre : %s, Auteur : %s\n", livre.Titre, livre.Auteur)
+}
+```
+
+#### Utilisation dans une route HTTP
+
+Une route de backend peut renvoyer un objet JSON avec `json.NewEncoder(w).Encode(data)` :
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"net/http"
+)
+
+type Reponse struct {
+	Message string `json:"message"`
+}
+
+func bonjourHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(Reponse{Message: "Bonjour depuis Go !"})
+}
+
+func main() {
+	http.HandleFunc("/api/bonjour", bonjourHandler)
+	http.ListenAndServe(":8080", nil)
+}
+```
+
 ### Exercice proposé
 
 Créer une route `/api/bonjour` qui répond avec un message JSON ou texte, puis tester la réponse dans le navigateur ou avec `curl`.
+
+---
+
+## OS et package os
+
+### Pourquoi parler de l’OS en Go ?
+
+Le package `os` permet d’interagir avec le système d’exploitation : gérer les fichiers, les dossiers, lire les variables d’environnement, et vérifier les droits ou l’existence d’un chemin.
+
+### Quelques usages courants
+
+- `os.Stat` : obtenir des informations sur un fichier ou un dossier
+- `os.Mkdir` / `os.MkdirAll` : créer un dossier
+- `os.WriteFile` : écrire un fichier
+- `os.ReadFile` : lire un fichier
+- `os.Getenv` : lire une variable d’environnement
+- `os.Exit` : quitter avec un code de sortie
+
+### Exemple : création et lecture d’un dossier de logs
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+)
+
+func main() {
+	dossier := "mes_logs"
+
+	// Créer le dossier s'il n'existe pas
+	if err := os.MkdirAll(dossier, 0755); err != nil {
+		fmt.Println("Erreur création dossier :", err)
+		return
+	}
+
+	chemin := filepath.Join(dossier, "app.log")
+	contenu := []byte("2026-08-08 : Serveur démarré\n")
+
+	if err := os.WriteFile(chemin, contenu, 0644); err != nil {
+		fmt.Println("Erreur écriture fichier :", err)
+		return
+	}
+
+	data, err := os.ReadFile(chemin)
+	if err != nil {
+		fmt.Println("Erreur lecture fichier :", err)
+		return
+	}
+
+	fmt.Println(string(data))
+}
+```
+
+### Exemple : lire une variable d’environnement
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	mode := os.Getenv("APP_MODE")
+	if mode == "" {
+		mode = "development"
+	}
+	fmt.Println("Mode d'exécution :", mode)
+}
+```
+
+### Attention aux chemins et aux permissions
+
+Sur Linux/macOS, `0755` donne accès à la lecture/exécution pour tous et écriture pour le propriétaire.
+Sur Windows, les permissions sont gérées différemment, mais `os.MkdirAll` reste valide.
 
 ---
 
